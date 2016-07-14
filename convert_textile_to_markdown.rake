@@ -39,7 +39,7 @@ namespace :redmine do
                 "-o",
                 dst.path,
             ]
-            print command
+            # print command
             system(*command) or raise "pandoc failed"
 
             dst.open
