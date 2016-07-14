@@ -5,7 +5,7 @@
 require 'tempfile'
 
 namespace :redmine do
-  desc 'Trac migration script'
+  desc 'Syntax conversion from textile to markdown'
   task :convert_textile_to_markdown => :environment do
 
     WikiContent.all.each do |wiki|
