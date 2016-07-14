@@ -18,8 +18,7 @@ namespace :redmine do
         wiki_content_total = WikiContent.count
         WikiContent.all.each do |wiki|
           wiki_content_count += 1
-          print "page_id: " + wiki.page_id.to_s
-          simplebar(who, wiki_content_count, wiki_content_total)
+          simplebar(who + "(page_id: " + wiki.page_id.to_s + ")", wiki_content_count, wiki_content_total)
           ([wiki] + wiki.versions).each do |version|
             textile = version.text
             src = Tempfile.new('textile')
@@ -40,6 +39,7 @@ namespace :redmine do
                 "-o",
                 dst.path,
             ]
+            print command
             system(*command) or raise "pandoc failed"
 
             dst.open
