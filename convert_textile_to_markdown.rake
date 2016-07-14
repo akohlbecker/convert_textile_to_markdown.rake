@@ -2,42 +2,46 @@
 # see also http://www.redmine.org/issues/22005
 # Modified to be compatible with newer Pandoc versions with "markdown_strict" format
 
-task :convert_textile_to_markdown => :environment do
+require 'tempfile'
 
-  require 'tempfile'
-  WikiContent.all.each do |wiki|
-    ([wiki] + wiki.versions).each do |version|
-      textile = version.text
-      src = Tempfile.new('textile')
-      src.write(textile)
-      src.close
-      dst = Tempfile.new('markdown')
-      dst.close
+namespace :redmine do
+  desc 'Trac migration script'
+  task :convert_textile_to_markdown => :environment do
 
-      command = [
-        "pandoc",
-        "--no-wrap",
-        "--smart",
-        "-f",
-        "textile",
-        "-t",
-        "markdown_strict",
-        src.path,
-        "-o",
-        dst.path,
-      ]
-      system(*command) or raise "pandoc failed"
+    WikiContent.all.each do |wiki|
+      ([wiki] + wiki.versions).each do |version|
+        textile = version.text
+        src = Tempfile.new('textile')
+        src.write(textile)
+        src.close
+        dst = Tempfile.new('markdown')
+        dst.close
 
-      dst.open
-      markdown = dst.read
+        command = [
+            "pandoc",
+            "--no-wrap",
+            "--smart",
+            "-f",
+            "textile",
+            "-t",
+            "markdown_strict",
+            src.path,
+            "-o",
+            dst.path,
+        ]
+        system(*command) or raise "pandoc failed"
 
-      # remove the \ pandoc puts before * and > at begining of lines
-      markdown.gsub!(/^((\\[*>])+)/) { $1.gsub("\\", "") }
+        dst.open
+        markdown = dst.read
 
-      # add a blank line before lists
-      markdown.gsub!(/^([^*].*)\n\*/, "\\1\n\n*")
+        # remove the \ pandoc puts before * and > at begining of lines
+        markdown.gsub!(/^((\\[*>])+)/) { $1.gsub("\\", "") }
 
-      version.update_attribute(:text, markdown)
+        # add a blank line before lists
+        markdown.gsub!(/^([^*].*)\n\*/, "\\1\n\n*")
+
+        version.update_attribute(:text, markdown)
+      end
     end
   end
 end
