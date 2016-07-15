@@ -33,7 +33,7 @@ namespace :redmine do
         issue_total = Issue.count
         Issue.all.each do |issue|
           issue_count += 1
-          simplebar(who + "(page_id: " + issue.id.to_s + ")", issue_count, issue_total)
+          simplebar(who + "(id: " + issue.id.to_s + ")", issue_count, issue_total)
           markdown =  textile_to_md(issue.description)
           issue.update_attribute(:description, markdown)
         end
