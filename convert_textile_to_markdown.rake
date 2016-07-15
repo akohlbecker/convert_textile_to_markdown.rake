@@ -33,7 +33,8 @@ namespace :redmine do
 
             command = [
                 "pandoc",
-                "--no-wrap",
+                # "--no-wrap", # deprecated since v1.16 replaces by --wrap=none
+                "--wrap=none", # 
                 "--smart",
                 "-f",
                 "textile",
