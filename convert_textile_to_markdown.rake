@@ -12,6 +12,10 @@ namespace :redmine do
 
       def self.convert
 
+        puts 'NOTE: Make sure you are using a recent version of pandoc.'
+        puts '      Otherwise the resulting markdown might be broken.'
+        # pandoc 1.12.2.1 is not suitable
+
         wiki_content_count = 0
 
         who = "Converting wiki contents"
