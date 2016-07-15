@@ -40,7 +40,7 @@ namespace :redmine do
 
         who = "Converting Jounals"
         journal_count = 0
-        journal_total = Issue.count
+        journal_total = Journal.count
         Journal.all.each do |journal|
           journal_count += 1
           simplebar(who + "(id: " + journal.id.to_s + ")", journal_count, journal_total)
@@ -65,7 +65,8 @@ namespace :redmine do
             "-f",
             "textile",
             "-t",
-            "markdown_strict",
+            "markdown_strict", # alternatives: http://pandoc.org/README.html#markdown-variants
+            "--atx-headers",
             src.path,
             "-o",
             dst.path,
@@ -81,6 +82,10 @@ namespace :redmine do
 
         # add a blank line before lists
         markdown.gsub!(/^([^*].*)\n\*/, "\\1\n\n*")
+
+        # remove <!-- --> which occur between some list items, see pandoc manual 'Ending a list'
+        markdown.gsub!(/^<!-- -->\n/, '')
+
         markdown
       end
 
