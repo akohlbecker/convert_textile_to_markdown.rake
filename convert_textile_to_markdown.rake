@@ -16,49 +16,72 @@ namespace :redmine do
         puts '      Otherwise the resulting markdown might be broken.'
         # pandoc 1.12.2.1 is not suitable
 
-        wiki_content_count = 0
-
         who = "Converting wiki contents"
+        wiki_content_count = 0
         wiki_content_total = WikiContent.count
         WikiContent.all.each do |wiki|
           wiki_content_count += 1
           simplebar(who + "(page_id: " + wiki.page_id.to_s + ")", wiki_content_count, wiki_content_total)
           ([wiki] + wiki.versions).each do |version|
-            textile = version.text
-            src = Tempfile.new('textile')
-            src.write(textile)
-            src.close
-            dst = Tempfile.new('markdown')
-            dst.close
-
-            command = [
-                "pandoc",
-                # "--no-wrap", # deprecated since v1.16 replaces by --wrap=none
-                "--wrap=none", # 
-                "--smart",
-                "-f",
-                "textile",
-                "-t",
-                "markdown_strict",
-                src.path,
-                "-o",
-                dst.path,
-            ]
-            # print command
-            system(*command) or raise "pandoc failed"
-
-            dst.open
-            markdown = dst.read
-
-            # remove the \ pandoc puts before * and > at begining of lines
-            markdown.gsub!(/^((\\[*>])+)/) { $1.gsub("\\", "") }
-
-            # add a blank line before lists
-            markdown.gsub!(/^([^*].*)\n\*/, "\\1\n\n*")
-
+            markdown = textile_to_md(version.text)
             version.update_attribute(:text, markdown)
           end
         end
+
+        who = "Converting Issues"
+        issue_count = 0
+        issue_total = Issue.count
+        Issue.all.each do |issue|
+          issue_count += 1
+          simplebar(who + "(page_id: " + issue.id.to_s + ")", issue_count, issue_total)
+          markdown =  textile_to_md(issue.description)
+          issue.update_attribute(:description, markdown)
+        end
+
+        who = "Converting Jounals"
+        journal_count = 0
+        journal_total = Issue.count
+        Journal.all.each do |journal|
+          journal_count += 1
+          simplebar(who + "(id: " + journal.id.to_s + ")", journal_count, journal_total)
+          markdown =  textile_to_md(journal.notes)
+          journal.update_attribute(:notes, markdown)
+        end
+
+      end
+
+      def self.textile_to_md(textile)
+        src = Tempfile.new('textile')
+        src.write(textile)
+        src.close
+        dst = Tempfile.new('markdown')
+        dst.close
+
+        command = [
+            "pandoc",
+            # "--no-wrap", # deprecated since v1.16 replaces by --wrap=none
+            "--wrap=none", #
+            "--smart",
+            "-f",
+            "textile",
+            "-t",
+            "markdown_strict",
+            src.path,
+            "-o",
+            dst.path,
+        ]
+        # print command
+        system(*command) or raise "pandoc failed"
+
+        dst.open
+        markdown = dst.read
+
+        # remove the \ pandoc puts before * and > at begining of lines
+        markdown.gsub!(/^((\\[*>])+)/) { $1.gsub("\\", "") }
+
+        # add a blank line before lists
+        markdown.gsub!(/^([^*].*)\n\*/, "\\1\n\n*")
+        markdown
       end
 
 
