@@ -1,1 +1,3 @@
 # convert_textile_to_markdown.rake
+
+This rake skript is using [Pandoc](http://pandoc.org/) for the conversion from textile to markdown. Pandoc however creates a lot of artifacts and can in some cases create markdown which causes redmine (v3.3.0) to crash. I order to avoid these problems I decided to take a more direct and simplistic approach: [akohlbecker/textile_to_markdown.rake](https://github.com/akohlbecker/textile_to_markdown.rake)
